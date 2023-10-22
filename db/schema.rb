@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_07_24_095814) do
+ActiveRecord::Schema.define(version: 2023_10_21_045431) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -522,6 +522,22 @@ ActiveRecord::Schema.define(version: 2023_07_24_095814) do
     t.index ["user_id"], name: "index_questions_on_user_id"
   end
 
+  create_table "quiz_results", force: :cascade do |t|
+    t.integer "score"
+    t.bigint "quiz_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["quiz_id"], name: "index_quiz_results_on_quiz_id"
+    t.index ["user_id"], name: "index_quiz_results_on_user_id"
+  end
+
+  create_table "quizzes", force: :cascade do |t|
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.string "title", null: false
+  end
+
   create_table "radio_button_choices", force: :cascade do |t|
     t.bigint "radio_button_id"
     t.string "choices"
@@ -609,6 +625,25 @@ ActiveRecord::Schema.define(version: 2023_07_24_095814) do
     t.index ["user_id", "reported_on"], name: "index_reports_on_user_id_and_reported_on", unique: true
     t.index ["user_id", "title"], name: "index_reports_on_user_id_and_title", unique: true
     t.index ["user_id"], name: "reports_user_id"
+  end
+
+  create_table "responses", force: :cascade do |t|
+    t.boolean "answer"
+    t.bigint "statement_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.bigint "quiz_result_id", null: false
+    t.index ["quiz_result_id"], name: "index_responses_on_quiz_result_id"
+    t.index ["statement_id"], name: "index_responses_on_statement_id"
+  end
+
+  create_table "statements", force: :cascade do |t|
+    t.bigint "quiz_id", null: false
+    t.text "body", null: false
+    t.boolean "is_correct", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["quiz_id"], name: "index_statements_on_quiz_id"
   end
 
   create_table "survey_question_listings", force: :cascade do |t|
@@ -799,6 +834,8 @@ ActiveRecord::Schema.define(version: 2023_07_24_095814) do
   add_foreign_key "products", "practices"
   add_foreign_key "products", "users"
   add_foreign_key "questions", "practices"
+  add_foreign_key "quiz_results", "quizzes"
+  add_foreign_key "quiz_results", "users"
   add_foreign_key "radio_button_choices", "radio_buttons"
   add_foreign_key "radio_buttons", "survey_questions"
   add_foreign_key "reactions", "users"
@@ -807,6 +844,9 @@ ActiveRecord::Schema.define(version: 2023_07_24_095814) do
   add_foreign_key "regular_event_repeat_rules", "regular_events"
   add_foreign_key "regular_events", "users"
   add_foreign_key "report_templates", "users"
+  add_foreign_key "responses", "quiz_results"
+  add_foreign_key "responses", "statements"
+  add_foreign_key "statements", "quizzes"
   add_foreign_key "survey_question_listings", "survey_questions"
   add_foreign_key "survey_question_listings", "surveys"
   add_foreign_key "survey_questions", "users"
