@@ -199,4 +199,15 @@ class ProductTest < ActiveSupport::TestCase
     wip_product.update!(body: 'product is updated.', wip: false, published_at: Time.current)
     assert_not wip_product.updated_after_submission?
   end
+
+  test 'should not contain wrong repo url' do
+    product = Product.new(
+      body: 'https://github.com/fjordllc/hoge-fuga/pull/123',
+      user: users(:kimura),
+      practice: practices(:practice5),
+      checker_id: nil
+    )
+    product.valid?
+    assert_equal ['PRを再作成してください'], product.errors[:body]
+  end
 end
